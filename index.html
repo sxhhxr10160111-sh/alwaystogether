@@ -1,1 +1,187 @@
+<!DOCTYPE html><html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一直在一起</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Helvetica Neue", sans-serif;
+      background-color: #fdf6f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+    h1 {
+      font-size: 2rem;
+      color: #444;
+      margin-bottom: 30px;
+      z-index: 2;
+    }
+    img {
+      max-width: 180px;
+      margin-bottom: 20px;
+      z-index: 2;
+    }
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 2;
+    }
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background-color: #d9c1b3;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background-color: #c4aa9d;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+  <img src="https://i.imgur.com/qG7XBrG.png" alt="together">
+  <h1 id="question">可以和我一直在一起吗？</h1>
+  <div class="buttons">
+    <button onclick="accept()">可以</button>
+    <button onclick="consider()" id="considerBtn">再考虑一下</button>
+    <button onclick="reject()" id="rejectBtn">不可以</button>
+  </div>  <script>
+    // 文案逻辑
+    const considerTexts = [
+      "慢慢来，我等你。",
+      "再考虑？你是不是不太了解我。",
+      "我也有耐心，不过是有限的那种。",
+      "考虑太久，会错过我的温柔哦。",
+      "是我不够好，还是你太迟钝？",
+      "你是不是觉得，逃避我会比较安全？",
+      "我开始怀疑你是不想选我了。",
+      "再想一秒，我就会生气了。",
+      "最后一次机会，要不要珍惜？"
+    ];
 
+    const rejectTexts = [
+      "……你说什么？不可以？",
+      "那我该消失在你面前吗？",
+      "真心给你，你就这样丢掉？",
+      "是我看错你了，还是你还没看清我。",
+      "你真的舍得我走吗？",
+      "说不可以的时候，有没有心跳慢半拍。",
+      "别骗我，我能看穿你。",
+      "你嘴上说不可以，手指却犹豫着没点下去。",
+      "现在点“可以”还来得及。"
+    ];
+
+    let considerIndex = 0;
+    let rejectIndex = 0;
+
+    function accept() {
+      document.getElementById("question").innerText = "那就不许反悔了。我们一直在一起。";
+      document.querySelector(".buttons").innerHTML = "<button disabled style='background-color: #98c1a4;'>已锁定</button>";
+      confetti();
+    }
+
+    function consider() {
+      if (considerIndex < considerTexts.length) {
+        document.getElementById("question").innerText = considerTexts[considerIndex++];
+      } else {
+        forceAccept();
+      }
+    }
+
+    function reject() {
+      if (rejectIndex < rejectTexts.length) {
+        document.getElementById("question").innerText = rejectTexts[rejectIndex++];
+      } else {
+        forceAccept();
+      }
+    }
+
+    function forceAccept() {
+      document.getElementById("question").innerText = "我就知道你最后还是会留下。";
+      document.querySelector(".buttons").innerHTML = "<button disabled style='background-color: #98c1a4;'>逃不掉啦</button>";
+      confetti();
+    }
+
+    // 星星背景特效
+    const canvas = document.getElementById("stars");
+    const ctx = canvas.getContext("2d");
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    const stars = Array(100).fill().map(() => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Math.random() * 1.5 + 0.5,
+      d: Math.random() * 0.5 + 0.1
+    }));
+
+    function drawStars() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#fff";
+      stars.forEach(star => {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctx.fill();
+        star.y += star.d;
+        if (star.y > height) {
+          star.y = 0;
+          star.x = Math.random() * width;
+        }
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    drawStars();
+
+    window.addEventListener("resize", () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    });
+
+    // 彩带特效（简单）
+    function confetti() {
+      for (let i = 0; i < 30; i++) {
+        const el = document.createElement("div");
+        el.style.position = "fixed";
+        el.style.top = "-10px";
+        el.style.left = Math.random() * 100 + "%";
+        el.style.width = "10px";
+        el.style.height = "10px";
+        el.style.background = `hsl(${Math.random() * 360}, 70%, 70%)`;
+        el.style.borderRadius = "50%";
+        el.style.opacity = "0.8";
+        el.style.zIndex = 99;
+        el.style.pointerEvents = "none";
+        el.style.transition = "transform 3s ease-out, opacity 3s";
+        document.body.appendChild(el);
+        setTimeout(() => {
+          el.style.transform = `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 720}deg)`;
+          el.style.opacity = "0";
+        }, 50);
+        setTimeout(() => el.remove(), 3000);
+      }
+    }
+  </script></body>
+</html>
